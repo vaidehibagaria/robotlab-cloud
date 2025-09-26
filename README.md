@@ -92,6 +92,8 @@ RobotLab Cloud is a powerful platform that automatically generates complete robo
    ```
    http://localhost:8000
    ```
+   or use:
+   firefox robotlab_web_ui.html 
 
 ### Docker Usage (No ROS Required)
 
