@@ -105,15 +105,26 @@ When using Docker, you don't need to install ROS or Pinocchio locally:
 
 ## 📖 How to Use
 
+### ⚠️ **IMPORTANT: Robot ID Naming Convention**
+
+**🔴 CRITICAL: Your Robot ID must match your URDF filename exactly!**
+
+- If your URDF file is named `my_robot.urdf`, your Robot ID must be `my_robot`
+- If your URDF file is named `panda_arm.urdf`, your Robot ID must be `panda_arm`
+- This ensures proper file references and launch file compatibility
+- **Mismatched names will cause launch failures in Docker containers**
+
 ### 1. Upload Your Robot Description
 
 **Option A: Single URDF File**
 - Upload a `.urdf` or `.xacro` file
+- **Robot ID must match the URDF filename** (without extension)
 - The system will automatically search for associated mesh files
 - Best for: Simple robots with basic descriptions
 
 **Option B: Complete Robot Description Package**
 - Upload a ZIP file containing a complete robot_description package
+- **Robot ID should match the main URDF filename** in the package
 - Includes all meshes, materials, and configurations
 - Best for: Complex robots with detailed visual/collision models
 
@@ -191,22 +202,28 @@ ros2 launch your_robot_launch your_robot_launch.py
 
 ### Common Issues
 
-1. **"Pinocchio not found" error**
+1. **"Launch file not found" or "Simulation launch failed"**
+   - **Most common cause**: Robot ID doesn't match URDF filename
+   - Ensure Robot ID exactly matches your URDF filename (without .urdf extension)
+   - Example: If URDF is `my_robot.urdf`, Robot ID must be `my_robot`
+   - Check the Docker logs for "Available launch files" to see what was generated
+
+2. **"Pinocchio not found" error**
    - Install Pinocchio using pip: `python -m pip install pin`
    - Or follow the apt installation instructions above
    - Ensure environment variables are set correctly if using apt installation
 
-2. **"URDF parsing error"**
+3. **"URDF parsing error"**
    - Check that your URDF file is valid XML
    - Ensure the root element is `<robot>`
    - Verify file is not empty
 
-3. **"Mesh files not found" warnings**
+4. **"Mesh files not found" warnings**
    - These are warnings, not errors
    - The workspace will still generate successfully
    - For complete visual models, use robot_description packages (ZIP)
 
-4. **Port 8000 already in use**
+5. **Port 8000 already in use**
    - Kill existing processes: `pkill -f rcm_server.py`
    - Or change the port in `rcm_server.py`
 

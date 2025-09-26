@@ -177,6 +177,9 @@ class RobotConfigGenerator:
             else:
                 rcm = self._generate_rcm(urdf_path, robot_id)
             
+            # Save RCM data to the RCM package
+            self._save_rcm_data(workspace_path, robot_id, rcm)
+            
             # Detect smart packages based on robot capabilities
             smart_packages = self._detect_smart_packages(rcm)
             if smart_packages:
@@ -562,13 +565,19 @@ def generate_launch_description():
     # Get package directories
     robot_desc_pkg_dir = get_package_share_directory('{robot_id}_description')
     
+    # Find URDF file dynamically
+    urdf_files = [f for f in os.listdir(os.path.join(robot_desc_pkg_dir, 'urdf')) if f.endswith('.urdf')]
+    if not urdf_files:
+        raise FileNotFoundError(f"No URDF files found in {{robot_desc_pkg_dir}}/urdf/")
+    urdf_file = urdf_files[0]  # Use the first URDF file found
+    
     # Robot state publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[{{
-            'robot_description': open(os.path.join(robot_desc_pkg_dir, 'urdf', '{robot_id}.urdf'), 'r').read(),
+            'robot_description': open(os.path.join(robot_desc_pkg_dir, 'urdf', urdf_file), 'r').read(),
             'use_sim_time': True
         }}]
     )
@@ -613,13 +622,19 @@ def generate_launch_description():
     robot_desc_pkg_dir = get_package_share_directory('{robot_id}_description')
     rcm_pkg_dir = get_package_share_directory('{robot_id}_rcm')
     
+    # Find URDF file dynamically
+    urdf_files = [f for f in os.listdir(os.path.join(robot_desc_pkg_dir, 'urdf')) if f.endswith('.urdf')]
+    if not urdf_files:
+        raise FileNotFoundError(f"No URDF files found in {{robot_desc_pkg_dir}}/urdf/")
+    urdf_file = urdf_files[0]  # Use the first URDF file found
+    
     # Robot state publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[{{
-            'robot_description': open(os.path.join(robot_desc_pkg_dir, 'urdf', '{robot_id}.urdf'), 'r').read(),
+            'robot_description': open(os.path.join(robot_desc_pkg_dir, 'urdf', urdf_file), 'r').read(),
             'use_sim_time': True
         }}]
     )
@@ -687,8 +702,14 @@ def generate_launch_description():
     # RViz config file
     rviz_config_file = os.path.join(rviz_pkg_dir, 'rviz', '{robot_id}_config.rviz')
     
+    # Find URDF file dynamically
+    urdf_files = [f for f in os.listdir(os.path.join(robot_desc_pkg_dir, 'urdf')) if f.endswith('.urdf')]
+    if not urdf_files:
+        raise FileNotFoundError(f"No URDF files found in {{robot_desc_pkg_dir}}/urdf/")
+    urdf_file = urdf_files[0]  # Use the first URDF file found
+    
     # Robot description
-    robot_description_content = open(os.path.join(robot_desc_pkg_dir, 'urdf', '{robot_id}.urdf'), 'r').read()
+    robot_description_content = open(os.path.join(robot_desc_pkg_dir, 'urdf', urdf_file), 'r').read()
     robot_description = {{"robot_description": robot_description_content}}
     
     # Robot state publisher
@@ -752,13 +773,19 @@ def generate_launch_description():
     robot_desc_pkg_dir = get_package_share_directory('{robot_id}_description')
     rviz_pkg_dir = get_package_share_directory('{robot_id}_rviz')
     
+    # Find URDF file dynamically
+    urdf_files = [f for f in os.listdir(os.path.join(robot_desc_pkg_dir, 'urdf')) if f.endswith('.urdf')]
+    if not urdf_files:
+        raise FileNotFoundError(f"No URDF files found in {{robot_desc_pkg_dir}}/urdf/")
+    urdf_file = urdf_files[0]  # Use the first URDF file found
+    
     # Robot state publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[{{
-            'robot_description': open(os.path.join(robot_desc_pkg_dir, 'urdf', '{robot_id}.urdf'), 'r').read(),
+            'robot_description': open(os.path.join(robot_desc_pkg_dir, 'urdf', urdf_file), 'r').read(),
             'use_sim_time': True
         }}]
     )
@@ -1273,26 +1300,25 @@ Window Geometry:
         }
         
         # Create Dockerfile
-        dockerfile_content = f"""FROM ros:humble-desktop-full
+        dockerfile_content = f"""FROM osrf/ros:humble-desktop-full
 
 # Install additional packages
 RUN apt-get update && apt-get install -y \\
     python3-pip \\
     python3-colcon-common-extensions \\
+    x11-apps \\
+    mesa-utils \\
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-RUN pip3 install pinocchio
+RUN pip3 install pin
 
 # Set up workspace
 WORKDIR /workspace
 COPY . /workspace/
 
-# Build the workspace
-RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
-
-# Source the workspace
-RUN echo "source /workspace/install/setup.bash" >> /root/.bashrc
+# Source the workspace setup
+RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
 
 CMD ["/bin/bash"]
 """
@@ -1309,11 +1335,15 @@ services:
     container_name: {robot_id}_workspace
     environment:
       - ROS_DOMAIN_ID=0
+      - DISPLAY=${{DISPLAY}}
+      - QT_X11_NO_MITSHM=1
     volumes:
       - .:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
     ports:
       - "8080:8080"
-    command: /bin/bash -c "source /workspace/install/setup.bash && ros2 launch {robot_id}_launch {robot_id}_launch.py"
+    network_mode: host
+    command: /bin/bash -c "cd /workspace && source /opt/ros/humble/setup.bash && colcon build --symlink-install && source install/setup.bash && echo 'Available launch files:' && find src/{robot_id}_launch/launch/ -name '*.launch.py' 2>/dev/null || echo 'No launch files found' && echo 'Launching simulation...' && (ros2 launch {robot_id}_launch {robot_id}_simulation.launch.py || (echo 'Simulation launch failed, trying basic launch...' && ros2 launch {robot_id}_launch {robot_id}_basic.launch.py))"
 """
         
         with open(workspace_path / "docker-compose.yml", "w") as f:
@@ -1402,9 +1432,39 @@ ament_package()"""
         with open(rcm_package_dir / "CMakeLists.txt", "w") as f:
             f.write(cmake_lists)
         
-        # Create rcm directory
-        (rcm_package_dir / "rcm").mkdir(exist_ok=True)
+        # Create rcm directory and RCM JSON file
+        rcm_dir = rcm_package_dir / "rcm"
+        rcm_dir.mkdir(exist_ok=True)
+        
+        # Create a placeholder RCM JSON file
+        rcm_json_path = rcm_dir / f"{robot_id}_rcm.json"
+        placeholder_rcm = {
+            "robot_id": robot_id,
+            "metadata": {
+                "generated_by": "RobotLab Cloud",
+                "generation_timestamp": time.time(),
+                "status": "placeholder"
+            },
+            "joints": {},
+            "primitives": [],
+            "capabilities": []
+        }
+        
+        with open(rcm_json_path, 'w') as f:
+            json.dump(placeholder_rcm, f, indent=2)
     
+    def _save_rcm_data(self, workspace_path: Path, robot_id: str, rcm: Dict[str, Any]) -> None:
+        """Save RCM data to the RCM package directory"""
+        rcm_package_dir = workspace_path / "src" / f"{robot_id}_rcm"
+        rcm_dir = rcm_package_dir / "rcm"
+        rcm_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save the actual RCM data
+        rcm_json_path = rcm_dir / f"{robot_id}_rcm.json"
+        with open(rcm_json_path, 'w') as f:
+            json.dump(rcm, f, indent=2)
+        
+        logger.info(f"Saved RCM data to {rcm_json_path}")
     
     def _create_additional_packages(self, workspace_path: Path, robot_id: str, additional_packages: List[str]) -> List[str]:
         """Create ROS packages for additional packages"""
