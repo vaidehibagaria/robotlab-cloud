@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobotLab Cloud - Robot Workspace Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+        .explanation {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+        .explanation h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .explanation p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .feature-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .feature-item h4 {
+            margin: 0 0 8px 0;
+            color: #3498db;
+        }
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .file-input {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-input input[type=file] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .file-input-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+        .file-input-label:hover {
+            background: #e3f2fd;
+            border-color: #2980b9;
+        }
+        .file-input-label.dragover {
+            background: #e3f2fd;
+            border-color: #2980b9;
+        }
+        
+        .upload-type-toggle {
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .upload-type-toggle label {
+            display: inline-block;
+            margin-right: 20px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .upload-type-toggle input[type="radio"] {
+            margin-right: 8px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .workspace-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .workspace-info h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .feature-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .feature-card ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .feature-card li {
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .workspace-preview {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .workspace-tree {
+            font-family: monospace;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border: 1px solid #dee2e6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .workspace-tree .folder {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .workspace-tree .file {
+            color: #28a745;
+        }
+        
+        .preview-actions {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .tutorial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .tutorial-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #17a2b8;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tutorial-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: #e9ecef;
+        }
+        
+        .tutorial-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .tutorial-card p {
+            color: #555;
+            margin: 10px 0;
+        }
+        
+        .tutorial-duration {
+            color: #6c757d;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        
+        .tutorial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tutorial-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .tutorial-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .tutorial-close:hover {
+            color: #333;
+        }
+        
+        #tutorialTitle {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        #tutorialBody {
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        #tutorialBody h2 {
+            color: #2c3e50;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        #tutorialBody h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        #tutorialBody pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        #tutorialBody code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 RobotLab Cloud</h1>
+                <p>Generate complete robot workspaces from URDFs or robot_description packages in seconds</p>
+        </div>
+        
+        <div class="content">
+            <div class="explanation">
+                <h3>🚀 Welcome to RobotLab Cloud</h3>
+                <p>Transform your robot URDF files into complete, production-ready ROS workspaces in seconds! Our platform automatically generates all the necessary components for robot development and deployment.</p>
+                
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📁 Complete Workspace Generation</h4>
+                        <p>Automatically creates ROS packages, launch files, and configuration files from your URDF</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🐳 Docker Ready</h4>
+                        <p>Generates Dockerfile and docker-compose.yml for easy containerization and deployment</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🧠 Smart Package Detection</h4>
+                        <p>Intelligently detects and adds MoveIt, navigation, and other packages based on your robot's capabilities</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>⚡ One-Click Download</h4>
+                        <p>Download your complete workspace as a ZIP file ready for immediate use</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🤖 Robot Workspace Generator</h2>
+                <p>Upload your URDF file or complete robot_description package (ZIP) and get a complete, ready-to-run robot workspace with ROS packages, launch files, Docker configuration, and RCM integration.</p>
+                
+                <form id="workspaceForm">
+                    <div class="form-group">
+                        <label for="robotId">Robot ID</label>
+                        <input type="text" id="robotId" name="robotId" placeholder="e.g., my_turtlebot" required>
+                        <small style="color: #666; font-size: 0.9em;">A unique identifier for your robot (used in package names and file paths)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="robotType">Robot Type</label>
+                        <select id="robotType" name="robotType">
+                            <option value="custom">Custom</option>
+                            <option value="turtlebot3">TurtleBot3</option>
+                            <option value="ur5">UR5 Industrial Arm</option>
+                            <option value="pioneer">Pioneer 3-DX</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="robotInput">Robot Description</label>
+                        <div class="file-input">
+                            <input type="file" id="robotInput" name="robotInput" accept=".urdf,.xacro,.zip" required>
+                            <label for="robotInput" class="file-input-label">
+                                📁 Click to upload robot description or drag and drop
+                                <br><small>Supports .urdf, .xacro files OR .zip robot_description package</small>
+                            </label>
+                        </div>
+                        
+                        <div class="upload-type-toggle">
+                            <label>
+                                <input type="radio" name="uploadType" value="urdf" checked>
+                                Single URDF/XACRO file
+                            </label>
+                            <label>
+                                <input type="radio" name="uploadType" value="package">
+                                Complete robot_description package (ZIP)
+                            </label>
+                        </div>
+                        <small style="color: #666; font-size: 0.9em; display: block; margin-top: 10px;">
+                            <strong>Single File:</strong> Upload just the .urdf or .xacro file (meshes will be searched for automatically)<br>
+                            <strong>Package:</strong> Upload a complete robot_description package as ZIP (includes all meshes, materials, and configurations)
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="additionalPackages">Additional ROS Packages (optional)</label>
+                        <input type="text" id="additionalPackages" name="additionalPackages" 
+                               placeholder="e.g., ros-humble-navigation2, ros-humble-moveit">
+                        <small style="color: #666; font-size: 0.9em;">Comma-separated list of additional ROS packages to include. Our system will also automatically detect and add relevant packages based on your robot's capabilities (MoveIt for manipulators, Navigation2 for mobile robots, etc.)</small>
+                    </div>
+                    
+                    <button type="submit" class="btn">Generate Robot Workspace</button>
+                </form>
+                
+                <div class="explanation" style="margin-top: 30px;">
+                    <h3>🔄 What happens when you generate a workspace?</h3>
+                    <ol style="margin: 15px 0; padding-left: 20px; line-height: 1.6;">
+                        <li><strong>RCM Generation:</strong> Your URDF is analyzed to create a Robot Capability Manifest (RCM) that describes your robot's capabilities</li>
+                        <li><strong>Smart Package Detection:</strong> The system automatically detects what ROS packages your robot needs (MoveIt, Navigation2, etc.)</li>
+                        <li><strong>Workspace Creation:</strong> A complete ROS workspace is generated with all necessary packages and configurations</li>
+                        <li><strong>Launch Files:</strong> Ready-to-use launch files are created for simulation, visualization, and control</li>
+                        <li><strong>Docker Setup:</strong> Dockerfile and docker-compose.yml are generated for easy deployment</li>
+                        <li><strong>Download Ready:</strong> Everything is packaged into a ZIP file for immediate download and use</li>
+                    </ol>
+                </div>
+                
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Generating your robot workspace...</p>
+                </div>
+                
+                <div id="status" class="status"></div>
+                
+                <div id="workspaceInfo" class="workspace-info">
+                    <h3>✅ Workspace Generated Successfully!</h3>
+                    <p><strong>Robot ID:</strong> <span id="generatedRobotId"></span></p>
+                    <p><strong>Workspace Path:</strong> <span id="workspacePath"></span></p>
+                    <p><strong>Launch Files:</strong> <span id="launchFiles"></span></p>
+                    <p><strong>Docker Ready:</strong> <span id="dockerReady"></span></p>
+                    
+                    <div style="margin-top: 20px;">
+                        <a id="downloadBtn" class="btn" href="#" target="_blank">📦 Download Workspace</a>
+                        <button id="viewInstructionsBtn" class="btn" style="margin-left: 10px;">📋 View Instructions</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Workspace Preview</h2>
+                <div id="workspacePreview" class="workspace-preview" style="display: none;">
+                    <h3>Generated Workspace Structure:</h3>
+                    <div id="workspaceTree" class="workspace-tree"></div>
+                    <div class="preview-actions">
+                        <button id="generateWorkspaceBtn" class="btn">✅ Generate Workspace</button>
+                        <button id="cancelPreviewBtn" class="btn" style="background: #e74c3c; margin-left: 10px;">❌ Cancel</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🎓 Beginner Tutorials</h2>
+                <div class="tutorial-grid">
+                    <div class="tutorial-card" onclick="showTutorial('getting-started')">
+                        <h3>🚀 Getting Started</h3>
+                        <p>Learn the basics of robot workspace generation and ROS 2 fundamentals</p>
+                        <span class="tutorial-duration">5 min read</span>
+                    </div>
+                    
+                    <div class="tutorial-card" onclick="showTutorial('urdf-basics')">
+                        <h3>📐 URDF Basics</h3>
+                        <p>Understand URDF structure and how to create robot descriptions</p>
+                        <span class="tutorial-duration">10 min read</span>
+                    </div>
+                    
+                    <div class="tutorial-card" onclick="showTutorial('launch-files')">
+                        <h3>🚀 Launch Files</h3>
+                        <p>Master ROS 2 launch files and multi-node coordination</p>
+                        <span class="tutorial-duration">8 min read</span>
+                    </div>
+                    
+                    <div class="tutorial-card" onclick="showTutorial('docker-setup')">
+                        <h3>🐳 Docker Setup</h3>
+                        <p>Containerize your robot workspace for reproducible environments</p>
+                        <span class="tutorial-duration">6 min read</span>
+                    </div>
+                    
+                    <div class="tutorial-card" onclick="showTutorial('moveit-intro')">
+                        <h3>🤖 MoveIt Introduction</h3>
+                        <p>Get started with robot manipulation planning and control</p>
+                        <span class="tutorial-duration">12 min read</span>
+                    </div>
+                    
+                    <div class="tutorial-card" onclick="showTutorial('troubleshooting')">
+                        <h3>🔧 Troubleshooting</h3>
+                        <p>Common issues and solutions for robot workspace problems</p>
+                        <span class="tutorial-duration">7 min read</span>
+                    </div>
+                </div>
+                
+                <div id="tutorialModal" class="tutorial-modal" style="display: none;">
+                    <div class="tutorial-content">
+                        <span class="tutorial-close" onclick="closeTutorial()">&times;</span>
+                        <div id="tutorialTitle"></div>
+                        <div id="tutorialBody"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🎯 Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>⚡ One-Click Setup</h3>
+                        <ul>
+                            <li>Upload URDF or robot_description package → Get complete workspace</li>
+                            <li>Auto-generated ROS packages</li>
+                            <li>Ready-to-run launch files</li>
+                            <li>Docker containerization</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>🔧 RCM Integration</h3>
+                        <ul>
+                            <li>Automatic RCM generation</li>
+                            <li>LLM-compatible tool definitions</li>
+                            <li>Robot capability manifests</li>
+                            <li>Safety constraints</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>🐳 Docker Ready</h3>
+                        <ul>
+                            <li>Complete Dockerfile included</li>
+                            <li>Docker Compose configuration</li>
+                            <li>Reproducible environments</li>
+                            <li>Cross-platform compatibility</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>📚 Robot Templates</h3>
+                        <ul>
+                            <li>TurtleBot3 configurations</li>
+                            <li>UR5 industrial arm setup</li>
+                            <li>Pioneer mobile robot</li>
+                            <li>Custom robot support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Server configuration
+        const SERVER_URL = 'http://localhost:8000';
+        
+        const form = document.getElementById('workspaceForm');
+        const status = document.getElementById('status');
+        const loading = document.getElementById('loading');
+        const workspaceInfo = document.getElementById('workspaceInfo');
+        
+        // File drag and drop
+        const fileInput = document.getElementById('robotInput');
+        const fileLabel = document.querySelector('.file-input-label');
+        const uploadTypeRadios = document.querySelectorAll('input[name="uploadType"]');
+
+        // Update file input accept attribute based on upload type
+        uploadTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'urdf') {
+                    fileInput.accept = '.urdf,.xacro';
+                    fileLabel.innerHTML = '📁 Click to upload URDF/XACRO file or drag and drop<br><small>Supports .urdf and .xacro files</small>';
+                } else {
+                    fileInput.accept = '.zip';
+                    fileLabel.innerHTML = '📁 Click to upload robot_description package or drag and drop<br><small>Supports .zip files containing complete robot_description package</small>';
+                }
+                fileInput.value = ''; // Clear previous selection
+            });
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                fileLabel.innerHTML = `📁 ${e.target.files[0].name}<br><small>Click to change file</small>`;
+            }
+        });
+        
+        fileLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileLabel.classList.add('dragover');
+        });
+        
+        fileLabel.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            fileLabel.classList.remove('dragover');
+        });
+        
+        fileLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileLabel.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileLabel.innerHTML = `📁 ${files[0].name}<br><small>Click to change file</small>`;
+            }
+        });
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const uploadType = document.querySelector('input[name="uploadType"]:checked').value;
+            
+            const formData = new FormData();
+            formData.append('robot_file', fileInput.files[0]);
+            formData.append('upload_type', uploadType);
+            formData.append('robot_type', document.getElementById('robotType').value);
+            formData.append('additional_packages', document.getElementById('additionalPackages').value);
+            
+            const robotId = document.getElementById('robotId').value;
+            
+            // Show loading
+            loading.style.display = 'block';
+            status.style.display = 'none';
+            workspaceInfo.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${SERVER_URL}/robots/${robotId}/generate-workspace`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (response.ok) {
+                    showStatus('success', result.message);
+                    showWorkspaceInfo(result);
+                } else {
+                    showStatus('error', result.detail || 'Failed to generate workspace');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                showStatus('error', 'Network error: ' + error.message);
+            }
+        });
+        
+        function showStatus(type, message) {
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+        
+        function showWorkspaceInfo(result) {
+            document.getElementById('generatedRobotId').textContent = result.robot_id;
+            document.getElementById('workspacePath').textContent = result.workspace_path;
+            document.getElementById('launchFiles').textContent = result.launch_files.join(', ');
+            document.getElementById('dockerReady').textContent = result.docker_ready ? 'Yes' : 'No';
+            
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.href = `${SERVER_URL}${result.download_url}`;
+            
+            workspaceInfo.style.display = 'block';
+        }
+        
+        // View instructions button
+        document.getElementById('viewInstructionsBtn').addEventListener('click', function() {
+            const robotId = document.getElementById('generatedRobotId').textContent;
+            const instructions = `
+# Robot Workspace Instructions
+
+## Robot ID: ${robotId}
+
+### Local Setup:
+1. Extract the downloaded ZIP file
+2. Open terminal and navigate to the workspace directory
+3. Run the following commands:
+   \`\`\`bash
+   source /opt/ros/humble/setup.bash
+   colcon build
+   source install/setup.bash
+   ros2 launch ${robotId}_robot ${robotId}_basic.launch.py
+   \`\`\`
+
+### Docker Setup:
+1. Extract the downloaded ZIP file
+2. Open terminal and navigate to the workspace directory
+3. Run:
+   \`\`\`bash
+   docker-compose up --build
+   \`\`\`
+
+### Features Included:
+- Complete ROS workspace structure
+- Auto-generated launch files
+- RCM integration
+- Docker configuration
+- RViz visualization config
+- Robot state publisher setup
+
+### Next Steps:
+- Customize launch files for your specific needs
+- Add additional ROS packages as required
+- Integrate with your existing ROS ecosystem
+- Use the generated RCM for LLM integration
+
+Happy robot development! 🤖
+            `;
+            
+            // Create a new window with instructions
+            const instructionsWindow = window.open('', '_blank', 'width=800,height=600');
+            instructionsWindow.document.write(`
+                <html>
+                <head>
+                    <title>Workspace Instructions - ${robotId}</title>
+                    <style>
+                        body { font-family: monospace; padding: 20px; line-height: 1.6; }
+                        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+                        h1 { color: #2c3e50; }
+                    </style>
+                </head>
+                <body>
+                    <pre>${instructions}</pre>
+                </body>
+                </html>
+            `);
+        });
+        
+        // Load robot templates on page load
+        async function loadTemplates() {
+            try {
+                const response = await fetch(`${SERVER_URL}/robot-templates`);
+                const data = await response.json();
+                console.log('Available templates:', data.templates);
+            } catch (error) {
+                console.log('Could not load templates:', error);
+            }
+        }
+        
+        loadTemplates();
+        
+        // Workspace preview functionality
+        let pendingFormData = null;
+        
+        // Modify form submission to show preview first
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const uploadType = document.querySelector('input[name="uploadType"]:checked').value;
+            
+            const formData = new FormData();
+            formData.append('robot_file', fileInput.files[0]);
+            formData.append('upload_type', uploadType);
+            formData.append('robot_type', document.getElementById('robotType').value);
+            formData.append('additional_packages', document.getElementById('additionalPackages').value);
+            
+            const robotId = document.getElementById('robotId').value;
+            
+            // Store form data for later use
+            pendingFormData = {
+                formData: formData,
+                robotId: robotId
+            };
+            
+            // Show workspace preview
+            showWorkspacePreview(robotId, uploadType);
+        });
+        
+        function showWorkspacePreview(robotId, uploadType) {
+            const preview = document.getElementById('workspacePreview');
+            const tree = document.getElementById('workspaceTree');
+            
+            // Generate workspace structure preview
+            const structure = generateWorkspaceStructure(robotId, uploadType);
+            tree.innerHTML = structure;
+            
+            preview.style.display = 'block';
+            
+            // Scroll to preview
+            preview.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function generateWorkspaceStructure(robotId, uploadType) {
+            const isPackage = uploadType === 'package';
+            const robotDescName = isPackage ? 'robot_description' : `${robotId}_robot`;
+            
+            return `
+📁 ${robotId}_workspace/
+├── 📁 src/
+│   ├── 📁 ${robotDescName}/
+│   │   ├── 📁 launch/
+│   │   ├── 📁 meshes/
+│   │   ├── 📁 urdf/
+│   │   └── 📄 package.xml
+│   ├── 📁 launch/
+│   │   └── 📄 ${robotId}_basic.launch.py
+│   ├── 📁 rviz/
+│   │   └── 📄 ${robotId}_config.rviz
+│   ├── 📁 rcm/
+│   │   └── 📄 ${robot_id}.json
+│   ├── 📁 robotlab_rcm/
+│   │   └── 📄 rcm_bridge.launch.py
+│   └── 📁 moveit/
+│       ├── 📁 config/
+│       ├── 📁 launch/
+│       └── 📄 package.xml
+├── 📄 README.md
+├── 📄 workspace_manifest.json
+├── 📄 Dockerfile
+└── 📄 docker-compose.yml
+            `;
+        }
+        
+        // Handle preview actions
+        document.getElementById('generateWorkspaceBtn').addEventListener('click', async function() {
+            if (!pendingFormData) return;
+            
+            const { formData, robotId } = pendingFormData;
+            
+            // Hide preview
+            document.getElementById('workspacePreview').style.display = 'none';
+            
+            // Show loading
+            loading.style.display = 'block';
+            status.style.display = 'none';
+            workspaceInfo.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${SERVER_URL}/robots/${robotId}/generate-workspace`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (response.ok) {
+                    showStatus('success', result.message);
+                    showWorkspaceInfo(result);
+                } else {
+                    showStatus('error', result.detail || 'Failed to generate workspace');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                showStatus('error', 'Network error: ' + error.message);
+            }
+            
+            // Clear pending data
+            pendingFormData = null;
+        });
+        
+        document.getElementById('cancelPreviewBtn').addEventListener('click', function() {
+            document.getElementById('workspacePreview').style.display = 'none';
+            pendingFormData = null;
+        });
+        
+        // Tutorial functionality
+        const tutorials = {
+            'getting-started': {
+                title: '🚀 Getting Started with RobotLab Cloud',
+                content: `
+<h2>Welcome to RobotLab Cloud!</h2>
+<p>RobotLab Cloud is your gateway to creating complete robot workspaces in seconds. This tutorial will walk you through the basics.</p>
+
+<h3>What You'll Learn</h3>
+<ul>
+    <li>How to upload robot descriptions</li>
+    <li>Understanding workspace structure</li>
+    <li>Basic ROS 2 concepts</li>
+    <li>Running your first robot</li>
+</ul>
+
+<h3>Step 1: Choose Your Robot</h3>
+<p>You can upload either:</p>
+<ul>
+    <li><strong>Single URDF/XACRO file:</strong> For simple robot descriptions</li>
+    <li><strong>Complete robot_description package:</strong> For full robot packages with meshes and launch files</li>
+</ul>
+
+<h3>Step 2: Generate Workspace</h3>
+<p>After uploading, RobotLab Cloud will:</p>
+<ul>
+    <li>Generate a complete ROS 2 workspace</li>
+    <li>Create necessary packages and launch files</li>
+    <li>Set up Docker configuration</li>
+    <li>Generate RCM for LLM integration</li>
+</ul>
+
+<h3>Step 3: Download and Run</h3>
+<p>Once generated, you can:</p>
+<ul>
+    <li>Download the complete workspace as a ZIP file</li>
+    <li>Extract and build with <code>colcon build</code></li>
+    <li>Run with Docker using <code>docker-compose up</code></li>
+</ul>
+
+<h3>Next Steps</h3>
+<p>Ready to dive deeper? Check out our other tutorials on URDF basics, launch files, and MoveIt integration!</p>
+                `
+            },
+            'urdf-basics': {
+                title: '📐 Understanding URDF Files',
+                content: `
+<h2>What is a URDF?</h2>
+<p>URDF (Unified Robot Description Format) is an XML file format used in ROS to describe a robot's physical properties.</p>
+
+<h3>Key Components</h3>
+
+<h4>Links</h4>
+<p>Links represent rigid bodies (parts of your robot):</p>
+<pre><code>&lt;link name="base_link"&gt;
+  &lt;visual&gt;
+    &lt;geometry&gt;
+      &lt;box size="0.1 0.1 0.1"/&gt;
+    &lt;/geometry&gt;
+  &lt;/visual&gt;
+&lt;/link&gt;</code></pre>
+
+<h4>Joints</h4>
+<p>Joints define how links move relative to each other:</p>
+<pre><code>&lt;joint name="joint1" type="revolute"&gt;
+  &lt;parent link="base_link"/&gt;
+  &lt;child link="link1"/&gt;
+  &lt;axis xyz="0 0 1"/&gt;
+&lt;/joint&gt;</code></pre>
+
+<h4>Materials</h4>
+<p>Define colors and textures:</p>
+<pre><code>&lt;material name="blue"&gt;
+  &lt;color rgba="0 0 1 1"/&gt;
+&lt;/material&gt;</code></pre>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Use descriptive names for links and joints</li>
+    <li>Keep your URDF modular with XACRO includes</li>
+    <li>Include collision geometry for safety</li>
+    <li>Define proper joint limits</li>
+</ul>
+
+<h3>Common Joint Types</h3>
+<ul>
+    <li><strong>revolute:</strong> Rotating joint (like an elbow)</li>
+    <li><strong>prismatic:</strong> Sliding joint (like a piston)</li>
+    <li><strong>fixed:</strong> No movement (like welded parts)</li>
+    <li><strong>continuous:</strong> Unlimited rotation (like a wheel)</li>
+</ul>
+                `
+            },
+            'launch-files': {
+                title: '🚀 ROS 2 Launch Files Explained',
+                content: `
+<h2>What are Launch Files?</h2>
+<p>Launch files are Python scripts that start multiple ROS 2 nodes and configure parameters in a coordinated way.</p>
+
+<h3>Basic Structure</h3>
+<pre><code>#!/usr/bin/env python3
+
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='robot_package',
+            executable='robot_node',
+            name='my_robot',
+            parameters=[{'param1': 'value1'}]
+        ),
+    ])
+</code></pre>
+
+<h3>Key Components</h3>
+
+<h4>Nodes</h4>
+<p>Start individual ROS 2 processes:</p>
+<pre><code>Node(
+    package='package_name',
+    executable='node_name',
+    name='custom_name',
+    parameters=[{'param': 'value'}]
+)</code></pre>
+
+<h4>Parameters</h4>
+<p>Configure node behavior:</p>
+<pre><code>parameters=[
+    {'use_sim_time': True},
+    {'robot_name': 'my_robot'}
+]</code></pre>
+
+<h4>Arguments</h4>
+<p>Make launch files flexible:</p>
+<pre><code>DeclareLaunchArgument(
+    'robot_name',
+    default_value='default_robot',
+    description='Name of the robot'
+)</code></pre>
+
+<h3>Advanced Features</h3>
+
+<h4>Conditional Logic</h4>
+<pre><code>from launch.conditions import IfCondition
+
+Node(
+    package='simulation',
+    executable='gazebo',
+    condition=IfCondition(LaunchConfiguration('use_sim'))
+)</code></pre>
+
+<h4>File Includes</h4>
+<pre><code>from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(
+        os.path.join(pkg_share, 'launch', 'other.launch.py')
+    )
+)</code></pre>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Use descriptive node names</li>
+    <li>Group related nodes in the same launch file</li>
+    <li>Make parameters configurable with arguments</li>
+    <li>Include error handling and logging</li>
+</ul>
+                `
+            },
+            'docker-setup': {
+                title: '🐳 Docker Setup for Robot Workspaces',
+                content: `
+<h2>Why Use Docker?</h2>
+<p>Docker ensures your robot workspace runs consistently across different computers and operating systems.</p>
+
+<h3>Benefits</h3>
+<ul>
+    <li><strong>Reproducibility:</strong> Same environment everywhere</li>
+    <li><strong>Isolation:</strong> No conflicts with system packages</li>
+    <li><strong>Portability:</strong> Easy to share and deploy</li>
+    <li><strong>Version Control:</strong> Lock specific ROS versions</li>
+</ul>
+
+<h3>Dockerfile Structure</h3>
+<pre><code>FROM ros:humble-desktop
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \\
+    python3-colcon-common-extensions \\
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy workspace
+COPY . /workspace
+WORKDIR /workspace
+
+# Build workspace
+RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
+
+# Set up environment
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+RUN echo "source /workspace/install/setup.bash" >> ~/.bashrc
+</code></pre>
+
+<h3>Docker Compose</h3>
+<pre><code>version: '3'
+services:
+  robot:
+    build: .
+    volumes:
+      - .:/workspace
+    ports:
+      - "11311:11311"  # ROS master
+      - "8080:8080"    # Web interface
+    environment:
+      - ROS_DOMAIN_ID=0
+    command: ros2 launch robot_package robot.launch.py
+</code></pre>
+
+<h3>Running with Docker</h3>
+<p>Build and run your workspace:</p>
+<pre><code># Build the container
+docker-compose build
+
+# Run the workspace
+docker-compose up
+
+# Run in background
+docker-compose up -d
+
+# Stop the workspace
+docker-compose down
+</code></pre>
+
+<h3>Development Workflow</h3>
+<ul>
+    <li>Edit files on your host machine</li>
+    <li>Changes are reflected in the container</li>
+    <li>Rebuild only when dependencies change</li>
+    <li>Use volumes for persistent data</li>
+</ul>
+                `
+            },
+            'moveit-intro': {
+                title: '🤖 MoveIt: Robot Manipulation Planning',
+                content: `
+<h2>What is MoveIt?</h2>
+<p>MoveIt is the most widely used software framework for mobile manipulation in ROS. It provides motion planning, manipulation, 3D perception, kinematics, control, and navigation.</p>
+
+<h3>Key Components</h3>
+
+<h4>Motion Planning</h4>
+<p>Generate collision-free paths for robot arms:</p>
+<ul>
+    <li>OMPL (Open Motion Planning Library)</li>
+    <li>Multiple planning algorithms (RRT, PRM, etc.)</li>
+    <li>Workspace and joint space planning</li>
+</ul>
+
+<h4>Kinematics</h4>
+<p>Convert between joint space and Cartesian space:</p>
+<ul>
+    <li>Forward kinematics: joint angles → end-effector pose</li>
+    <li>Inverse kinematics: end-effector pose → joint angles</li>
+    <li>KDL, TRAC-IK, and other solvers</li>
+</ul>
+
+<h4>Collision Detection</h4>
+<p>Ensure safe robot motion:</p>
+<ul>
+    <li>FCL (Flexible Collision Library)</li>
+    <li>Self-collision avoidance</li>
+    <li>Environment collision checking</li>
+</ul>
+
+<h3>Configuration Files</h3>
+
+<h4>SRDF (Semantic Robot Description Format)</h4>
+<p>Defines robot groups, end-effectors, and collision pairs:</p>
+<pre><code>&lt;robot name="my_robot"&gt;
+  &lt;group name="arm_group"&gt;
+    &lt;joint name="joint1"/&gt;
+    &lt;joint name="joint2"/&gt;
+  &lt;/group&gt;
+&lt;/robot&gt;</code></pre>
+
+<h4>MoveIt Config</h4>
+<p>Planning parameters and constraints:</p>
+<pre><code>planning_plugin: ompl_interface/OMPLPlanner
+planner_configs:
+  RRTConnect:
+    type: geometric::RRTConnect
+    range: 0.0
+</code></pre>
+
+<h3>Using MoveIt</h3>
+
+<h4>Planning Scene</h4>
+<pre><code># Add objects to planning scene
+scene.add_box("table", pose, size)
+
+# Plan motion
+plan = group.plan(target_pose)
+
+# Execute motion
+group.execute(plan)
+</code></pre>
+
+<h4>Pick and Place</h4>
+<p>High-level manipulation primitives:</p>
+<ul>
+    <li>Grasp planning</li>
+    <li>Place planning</li>
+    <li>Trajectory execution</li>
+</ul>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Define proper planning groups</li>
+    <li>Set realistic joint limits</li>
+    <li>Use collision objects for environment</li>
+    <li>Test with visualization tools</li>
+</ul>
+                `
+            },
+            'troubleshooting': {
+                title: '🔧 Common Issues and Solutions',
+                content: `
+<h2>Build Issues</h2>
+
+<h3>Package Not Found</h3>
+<p><strong>Error:</strong> <code>Package 'package_name' not found</code></p>
+<p><strong>Solution:</strong></p>
+<ul>
+    <li>Check package name in package.xml</li>
+    <li>Ensure package is in src/ directory</li>
+    <li>Run <code>colcon build --packages-select package_name</code></li>
+</ul>
+
+<h3>Missing Dependencies</h3>
+<p><strong>Error:</strong> <code>Could not find a package configuration file</code></p>
+<p><strong>Solution:</strong></p>
+<ul>
+    <li>Install missing ROS packages: <code>sudo apt install ros-humble-package-name</code></li>
+    <li>Update package.xml dependencies</li>
+    <li>Check ROS 2 installation</li>
+</ul>
+
+<h2>Runtime Issues</h2>
+
+<h3>Launch File Not Found</h3>
+<p><strong>Error:</strong> <code>Launch file not found</code></p>
+<p><strong>Solution:</strong></p>
+<ul>
+    <li>Source the workspace: <code>source install/setup.bash</code></li>
+    <li>Check launch file path</li>
+    <li>Ensure package is built</li>
+</ul>
+
+<h3>URDF Parsing Errors</h3>
+<p><strong>Error:</strong> <code>Invalid URDF model</code></p>
+<p><strong>Solution:</strong></p>
+<ul>
+    <li>Check XML syntax with <code>check_urdf</code></li>
+    <li>Validate joint and link definitions</li>
+    <li>Ensure all referenced files exist</li>
+</ul>
+
+<h2>Docker Issues</h2>
+
+<h3>Permission Denied</h3>
+<p><strong>Error:</strong> <code>Permission denied</code></p>
+<p><strong>Solution:</strong></p>
+<ul>
+    <li>Add user to docker group: <code>sudo usermod -aG docker $USER</code></li>
+    <li>Restart terminal or logout/login</li>
+    <li>Check file permissions</li>
+</ul>
+
+<h3>Port Conflicts</h3>
+<p><strong>Error:</strong> <code>Port already in use</code></p>
+<p><strong>Solution:</strong></p>
+<ul>
+    <li>Change port mapping in docker-compose.yml</li>
+    <li>Stop conflicting services</li>
+    <li>Use different ROS_DOMAIN_ID</li>
+</ul>
+
+<h2>MoveIt Issues</h2>
+
+<h3>Planning Fails</h3>
+<p><strong>Error:</strong> <code>Planning failed</code></p>
+<p><strong>Solution:</strong></p>
+<ul>
+    <li>Check joint limits in config</li>
+    <li>Verify start and goal states</li>
+    <li>Try different planning algorithms</li>
+    <li>Check collision objects</li>
+</ul>
+
+<h2>Getting Help</h2>
+<ul>
+    <li>Check ROS 2 documentation</li>
+    <li>Search ROS Answers</li>
+    <li>Join ROS community forums</li>
+    <li>Check package-specific documentation</li>
+</ul>
+                `
+            }
+        };
+        
+        function showTutorial(tutorialId) {
+            const tutorial = tutorials[tutorialId];
+            if (!tutorial) return;
+            
+            document.getElementById('tutorialTitle').innerHTML = tutorial.title;
+            document.getElementById('tutorialBody').innerHTML = tutorial.content;
+            document.getElementById('tutorialModal').style.display = 'flex';
+        }
+        
+        function closeTutorial() {
+            document.getElementById('tutorialModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('tutorialModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTutorial();
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,15 @@
+# RobotLab Cloud - Python Dependencies
+# Note: Pinocchio should be installed via conda for best compatibility
+
+# Web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# File handling
+python-multipart==0.0.6
+
+# CORS support
+fastapi-cors==0.0.6
+
+# Additional utilities
+pathlib2==2.3.7
