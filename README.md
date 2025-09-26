@@ -92,6 +92,8 @@ RobotLab Cloud is a powerful platform that automatically generates complete robo
    ```
    http://localhost:8000
    ```
+   or use:
+   firefox robotlab_web_ui.html 
 
 ### Docker Usage (No ROS Required)
 
@@ -166,8 +168,8 @@ your_robot_workspace/
 
 The system automatically detects robot capabilities and adds relevant packages:
 
-- **Manipulators**: Automatically adds MoveIt, MoveIt Servo, gripper controllers
-- **Mobile Robots**: Automatically adds Navigation2, SLAM toolbox
+- **Manipulators**: Automatically adds MoveIt, MoveIt Servo, gripper controllers (coming soon)
+- **Mobile Robots**: Automatically adds Navigation2, SLAM toolbox (coming soon)
 - **Articulated Arms**: Adds joint state publisher, robot state publisher
 
 ### Docker Deployment
